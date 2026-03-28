@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CogniPerform // Stroop_Protocol_v1.0</title>
+    <style>
+        :root {
+            --bg: #0d1117; /* GitHub Dark Mode */
+            --text: #c9d1d9;
+            --cyan: #58a6ff;
+            --red: #ff7b72;
+            --green: #7ee787;
+            --blue: #1f6feb;
+            --yellow: #d29922;
+        }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        #header {
+            font-size: 0.8rem;
+            color: var(--cyan);
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+        #word-container {
+            font-size: 4rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 40px;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        button {
+            background: transparent;
+            border: 1px solid #30363d;
+            color: var(--text);
+            padding: 10px 25px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: 0.2s;
+            border-radius: 6px;
+        }
+        button:hover { background: #161b22; border-color: var(--cyan); }
+        #stats {
+            margin-top: 40px;
+            font-size: 0.7rem;
+            color: #8b949e;
+            text-align: center;
+        }
+        .correct { color: var(--green); }
+        .wrong { color: var(--red); }
+    </style>
+</head>
+<body>
+
+    <div id="header">COGNI-PERFORM // STROOP_CORE_v1.0</div>
+    <div id="word-container">ŁADOWANIE...</div>
+
+    <div class="controls" id="btn-group">
+        </div>
+
+    <div id="stats">
+        Trafienia: <span id="hits" class="correct">0</span> | 
+        Błędy: <span id="misses" class="wrong">0</span> | 
+        Skróty: [1][2][3][4] na klawiaturze
+    </div>
+
+    <script>
+        const colors = [
+            { name: 'RED', hex: '#ff7b72', key: '1' },
+            { name: 'GREEN', hex: '#7ee787', key: '2' },
+            { name: 'BLUE', hex: '#58a6ff', key: '3' },
+            { name: 'YELLOW', hex: '#d29922', key: '4' }
+        ];
+
+        let hits = 0;
+        let misses = 0;
+        let currentTargetColor = '';
+
+        const wordEl = document.getElementById('word-container');
+        const btnGroup = document.getElementById('btn-group');
+
+        // Generuj przyciski
+        colors.forEach((c, index) => {
+            const btn = document.createElement('button');
+            btn.innerText = `[${index + 1}] ${c.name}`;
+            btn.onclick = () => checkColor(c.name);
+            btnGroup.appendChild(btn);
+        });
+
+        function nextRound() {
+            // Losuj słowo
+            const wordIndex = Math.floor(Math.random() * colors.length);
+            // Losuj kolor czcionki (inny niż słowo)
+            let colorIndex;
+            do {
+                colorIndex = Math.floor(Math.random() * colors.length);
+            } while (colorIndex === wordIndex);
+
+            wordEl.innerText = colors[wordIndex].name;
+            wordEl.style.color = colors[colorIndex].hex;
+            currentTargetColor = colors[colorIndex].name;
+        }
+
+        function checkColor(selectedName) {
+            if (selectedName === currentTargetColor) {
+                hits++;
+                document.getElementById('hits').innerText = hits;
+            } else {
+                misses++;
+                document.getElementById('misses').innerText = misses;
+            }
+            nextRound();
+        }
+
+        // Obsługa klawiatury (1,2,3,4)
+        window.addEventListener('keydown', (e) => {
+            const color = colors.find(c => c.key === e.key);
+            if (color) checkColor(color.name);
+        });
+
+        nextRound();
+    </script>
+</body>
+</html>
