@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CogniPerform // Stroop_Protocol_v2.1</title>
+    <title>CogniPerform // Stroop_v2.2</title>
     <style>
         :root {
             --bg: #0d1117;
             --text: #c9d1d9;
-            /* Nowa, ultra-wyraźna paleta */
             --red: #ff0000;
             --green: #00ff00;
-            --blue: #2255ff;
+            --blue: #3366ff;
             --yellow: #ffff00;
-            --purple: #cc00ff;
+            --purple: #cc33ff;
             --orange: #ff8800;
             --teal: #00ffff;
             --white: #ffffff;
@@ -25,22 +24,36 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start; /* Start od góry */
             height: 100vh;
             margin: 0;
+            padding-top: 20px;
             text-align: center;
+            overflow: hidden;
         }
-        #ui-layer, #result-layer { width: 100%; max-width: 500px; }
-        #result-layer { display: none; }
+        
+        /* NOWY PASEK STATUSU - Zamiast Calloutu w Notion */
+        #status-bar {
+            font-size: 0.7rem;
+            color: var(--teal);
+            letter-spacing: 1px;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 10px;
+            width: 90%;
+            margin-bottom: 30px;
+            opacity: 0.8;
+        }
 
-        #timer { font-size: 1.2rem; color: var(--orange); margin-bottom: 10px; font-weight: bold; }
+        #ui-layer, #result-layer { width: 100%; max-width: 500px; }
+        #result-layer { display: none; margin-top: 40px; }
+
+        #timer { font-size: 1.1rem; color: var(--orange); margin-bottom: 10px; font-weight: bold; }
         #word-display {
-            font-size: 4rem;
+            font-size: 3.8rem;
             font-weight: bold;
             text-transform: uppercase;
             margin: 20px 0;
-            min-height: 120px;
-            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+            min-height: 110px;
         }
         .controls {
             display: grid;
@@ -58,7 +71,6 @@
             font-weight: bold;
             cursor: pointer;
             border-radius: 6px;
-            transition: 0.1s;
         }
         button:active { transform: scale(0.95); background: #30363d; }
         
@@ -68,20 +80,24 @@
 </head>
 <body>
 
+    <div id="status-bar">
+        [ PROTOCOL: STROOP_CORE ] &nbsp; [ LIMIT: 60s ] &nbsp; [ TARGET: INHIBITION ]
+    </div>
+
     <div id="ui-layer">
-        <div id="timer">READY? PRESS 1-8 TO START</div>
-        <div id="word-display">STROOP TEST</div>
+        <div id="timer">READY? PRESS [1-8] TO START</div>
+        <div id="word-display">STROOP</div>
         <div class="controls" id="btn-group"></div>
     </div>
 
     <div id="result-layer">
         <div class="summary-box">
-            <h2 style="color:var(--teal)">PROTOCOL COMPLETE</h2>
+            <h2 style="color:var(--teal)">SESSION COMPLETE</h2>
             <p>Hits: <span id="final-hits" style="color:var(--green); font-weight:bold;">0</span></p>
             <p>Misses: <span id="final-misses" style="color:var(--red); font-weight:bold;">0</span></p>
             <hr style="border:0; border-top:1px solid #30363d; margin: 15px 0;">
             <p>Accuracy: <span id="final-acc" style="font-size:1.5rem;">0</span>%</p>
-            <button class="restart-btn" onclick="location.reload()">RESTART SESSION</button>
+            <button class="restart-btn" onclick="location.reload()">RESTART</button>
         </div>
     </div>
 
