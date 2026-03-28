@@ -3,82 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CogniPerform // Stroop_Protocol_v1.0</title>
+    <title>CogniPerform // Stroop_Protocol_v2.0</title>
     <style>
         :root {
-            --bg: #0d1117; /* GitHub Dark Mode */
+            --bg: #0d1117;
             --text: #c9d1d9;
             --cyan: #58a6ff;
             --red: #ff7b72;
             --green: #7ee787;
             --blue: #1f6feb;
             --yellow: #d29922;
+            --purple: #bc8cff;
+            --orange: #ffa657;
+            --white: #ffffff;
         }
         body {
             background-color: var(--bg);
             color: var(--text);
-            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-family: 'JetBrains Mono', monospace;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             margin: 0;
-            overflow: hidden;
+            text-align: center;
         }
-        #header {
-            font-size: 0.8rem;
-            color: var(--cyan);
-            margin-bottom: 20px;
-            letter-spacing: 2px;
-        }
-        #word-container {
-            font-size: 4rem;
+        #ui-layer, #result-layer { width: 100%; max-width: 500px; }
+        #result-layer { display: none; }
+
+        #timer { font-size: 1.2rem; color: var(--orange); margin-bottom: 10px; }
+        #word-display {
+            font-size: 3.5rem;
             font-weight: bold;
             text-transform: uppercase;
-            margin-bottom: 40px;
-            min-height: 120px;
-            display: flex;
-            align-items: center;
+            margin: 20px 0;
+            min-height: 100px;
         }
         .controls {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            padding: 10px;
         }
         button {
-            background: transparent;
+            background: #161b22;
             border: 1px solid #30363d;
             color: var(--text);
-            padding: 10px 25px;
+            padding: 12px 5px;
             font-family: inherit;
+            font-size: 0.7rem;
             cursor: pointer;
-            transition: 0.2s;
             border-radius: 6px;
         }
-        button:hover { background: #161b22; border-color: var(--cyan); }
-        #stats {
-            margin-top: 40px;
-            font-size: 0.7rem;
-            color: #8b949e;
-            text-align: center;
-        }
-        .correct { color: var(--green); }
-        .wrong { color: var(--red); }
+        button:hover { border-color: var(--cyan); }
+        
+        .summary-box { border: 1px solid var(--cyan); padding: 20px; border-radius: 8px; }
+        .big-stat { font-size: 2.5rem; color: var(--cyan); display: block; }
+        .restart-btn { margin-top: 20px; background: var(--cyan); color: var(--bg); font-weight: bold; border: none; padding: 10px 20px; width: auto; }
     </style>
 </head>
 <body>
 
-    <div id="header">COGNI-PERFORM // STROOP_CORE_v1.0</div>
-    <div id="word-container">ŁADOWANIE...</div>
+    <div id="ui-layer">
+        <div id="timer">CZAS: 60s</div>
+        <div id="word-display">Naciśnij [1-8], aby zacząć</div>
+        <div class="controls" id="btn-group"></div>
+    </div>
 
-    <div class="controls" id="btn-group">
+    <div id="result-layer">
+        <div class="summary-box">
+            <h2>PROTOCOL COMPLETE</h2>
+            <p>Trafienia: <span id="final-hits" style="color:var(--green)">0</span></p>
+            <p>Błędy: <span id="final-misses" style="color:var(--red)">0</span></p>
+            <p>Accuracy: <span id="final-acc">0</span>%</p>
+            <button class="restart-btn" onclick="location.reload()">RESTART PROTOCOL</button>
         </div>
-
-    <div id="stats">
-        Trafienia: <span id="hits" class="correct">0</span> | 
-        Błędy: <span id="misses" class="wrong">0</span> | 
-        Skróty: [1][2][3][4] na klawiaturze
     </div>
 
     <script>
@@ -86,50 +86,62 @@
             { name: 'RED', hex: '#ff7b72', key: '1' },
             { name: 'GREEN', hex: '#7ee787', key: '2' },
             { name: 'BLUE', hex: '#58a6ff', key: '3' },
-            { name: 'YELLOW', hex: '#d29922', key: '4' }
+            { name: 'YELLOW', hex: '#d29922', key: '4' },
+            { name: 'PURPLE', hex: '#bc8cff', key: '5' },
+            { name: 'ORANGE', hex: '#ffa657', key: '6' },
+            { name: 'CYAN', hex: '#39c5bb', key: '7' },
+            { name: 'WHITE', hex: '#ffffff', key: '8' }
         ];
 
-        let hits = 0;
-        let misses = 0;
-        let currentTargetColor = '';
+        let hits = 0, misses = 0, timeLeft = 60, timerActive = false, currentTarget = '';
 
-        const wordEl = document.getElementById('word-container');
+        const wordEl = document.getElementById('word-display');
+        const timerEl = document.getElementById('timer');
         const btnGroup = document.getElementById('btn-group');
 
-        // Generuj przyciski
-        colors.forEach((c, index) => {
+        colors.forEach((c) => {
             const btn = document.createElement('button');
-            btn.innerText = `[${index + 1}] ${c.name}`;
+            btn.innerText = `[${c.key}] ${c.name}`;
             btn.onclick = () => checkColor(c.name);
             btnGroup.appendChild(btn);
         });
 
-        function nextRound() {
-            // Losuj słowo
-            const wordIndex = Math.floor(Math.random() * colors.length);
-            // Losuj kolor czcionki (inny niż słowo)
-            let colorIndex;
-            do {
-                colorIndex = Math.floor(Math.random() * colors.length);
-            } while (colorIndex === wordIndex);
-
-            wordEl.innerText = colors[wordIndex].name;
-            wordEl.style.color = colors[colorIndex].hex;
-            currentTargetColor = colors[colorIndex].name;
+        function startTimer() {
+            timerActive = true;
+            const countdown = setInterval(() => {
+                timeLeft--;
+                timerEl.innerText = `CZAS: ${timeLeft}s`;
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    endGame();
+                }
+            }, 1000);
         }
 
-        function checkColor(selectedName) {
-            if (selectedName === currentTargetColor) {
-                hits++;
-                document.getElementById('hits').innerText = hits;
-            } else {
-                misses++;
-                document.getElementById('misses').innerText = misses;
-            }
+        function nextRound() {
+            const wIdx = Math.floor(Math.random() * colors.length);
+            let cIdx;
+            do { cIdx = Math.floor(Math.random() * colors.length); } while (cIdx === wIdx);
+            wordEl.innerText = colors[wIdx].name;
+            wordEl.style.color = colors[cIdx].hex;
+            currentTarget = colors[cIdx].name;
+        }
+
+        function checkColor(selected) {
+            if (!timerActive) startTimer();
+            selected === currentTarget ? hits++ : misses++;
             nextRound();
         }
 
-        // Obsługa klawiatury (1,2,3,4)
+        function endGame() {
+            document.getElementById('ui-layer').style.display = 'none';
+            document.getElementById('result-layer').style.display = 'block';
+            document.getElementById('final-hits').innerText = hits;
+            document.getElementById('final-misses').innerText = misses;
+            const acc = (hits + misses) > 0 ? Math.round((hits / (hits + misses)) * 100) : 0;
+            document.getElementById('final-acc').innerText = acc;
+        }
+
         window.addEventListener('keydown', (e) => {
             const color = colors.find(c => c.key === e.key);
             if (color) checkColor(color.name);
