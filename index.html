@@ -1,20 +1,21 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CogniPerform // Stroop_Protocol_v2.0</title>
+    <title>CogniPerform // Stroop_Protocol_v2.1</title>
     <style>
         :root {
             --bg: #0d1117;
             --text: #c9d1d9;
-            --cyan: #58a6ff;
-            --red: #ff7b72;
-            --green: #7ee787;
-            --blue: #1f6feb;
-            --yellow: #d29922;
-            --purple: #bc8cff;
-            --orange: #ffa657;
+            /* Nowa, ultra-wyraźna paleta */
+            --red: #ff0000;
+            --green: #00ff00;
+            --blue: #2255ff;
+            --yellow: #ffff00;
+            --purple: #cc00ff;
+            --orange: #ff8800;
+            --teal: #00ffff;
             --white: #ffffff;
         }
         body {
@@ -32,13 +33,14 @@
         #ui-layer, #result-layer { width: 100%; max-width: 500px; }
         #result-layer { display: none; }
 
-        #timer { font-size: 1.2rem; color: var(--orange); margin-bottom: 10px; }
+        #timer { font-size: 1.2rem; color: var(--orange); margin-bottom: 10px; font-weight: bold; }
         #word-display {
-            font-size: 3.5rem;
+            font-size: 4rem;
             font-weight: bold;
             text-transform: uppercase;
             margin: 20px 0;
-            min-height: 100px;
+            min-height: 120px;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
         }
         .controls {
             display: grid;
@@ -50,46 +52,48 @@
             background: #161b22;
             border: 1px solid #30363d;
             color: var(--text);
-            padding: 12px 5px;
+            padding: 12px 2px;
             font-family: inherit;
             font-size: 0.7rem;
+            font-weight: bold;
             cursor: pointer;
             border-radius: 6px;
+            transition: 0.1s;
         }
-        button:hover { border-color: var(--cyan); }
+        button:active { transform: scale(0.95); background: #30363d; }
         
-        .summary-box { border: 1px solid var(--cyan); padding: 20px; border-radius: 8px; }
-        .big-stat { font-size: 2.5rem; color: var(--cyan); display: block; }
-        .restart-btn { margin-top: 20px; background: var(--cyan); color: var(--bg); font-weight: bold; border: none; padding: 10px 20px; width: auto; }
+        .summary-box { border: 2px solid var(--teal); padding: 30px; border-radius: 12px; background: #161b22; }
+        .restart-btn { margin-top: 25px; background: var(--teal); color: #000; font-weight: bold; border: none; padding: 12px 30px; cursor: pointer; border-radius: 4px; }
     </style>
 </head>
 <body>
 
     <div id="ui-layer">
-        <div id="timer">CZAS: 60s</div>
-        <div id="word-display">Naciśnij [1-8], aby zacząć</div>
+        <div id="timer">READY? PRESS 1-8 TO START</div>
+        <div id="word-display">STROOP TEST</div>
         <div class="controls" id="btn-group"></div>
     </div>
 
     <div id="result-layer">
         <div class="summary-box">
-            <h2>PROTOCOL COMPLETE</h2>
-            <p>Trafienia: <span id="final-hits" style="color:var(--green)">0</span></p>
-            <p>Błędy: <span id="final-misses" style="color:var(--red)">0</span></p>
-            <p>Accuracy: <span id="final-acc">0</span>%</p>
-            <button class="restart-btn" onclick="location.reload()">RESTART PROTOCOL</button>
+            <h2 style="color:var(--teal)">PROTOCOL COMPLETE</h2>
+            <p>Hits: <span id="final-hits" style="color:var(--green); font-weight:bold;">0</span></p>
+            <p>Misses: <span id="final-misses" style="color:var(--red); font-weight:bold;">0</span></p>
+            <hr style="border:0; border-top:1px solid #30363d; margin: 15px 0;">
+            <p>Accuracy: <span id="final-acc" style="font-size:1.5rem;">0</span>%</p>
+            <button class="restart-btn" onclick="location.reload()">RESTART SESSION</button>
         </div>
     </div>
 
     <script>
         const colors = [
-            { name: 'RED', hex: '#ff7b72', key: '1' },
-            { name: 'GREEN', hex: '#7ee787', key: '2' },
-            { name: 'BLUE', hex: '#58a6ff', key: '3' },
-            { name: 'YELLOW', hex: '#d29922', key: '4' },
-            { name: 'PURPLE', hex: '#bc8cff', key: '5' },
-            { name: 'ORANGE', hex: '#ffa657', key: '6' },
-            { name: 'CYAN', hex: '#39c5bb', key: '7' },
+            { name: 'RED', hex: '#ff0000', key: '1' },
+            { name: 'GREEN', hex: '#00ff00', key: '2' },
+            { name: 'BLUE', hex: '#3366ff', key: '3' },
+            { name: 'YELLOW', hex: '#ffff00', key: '4' },
+            { name: 'PURPLE', hex: '#cc33ff', key: '5' },
+            { name: 'ORANGE', hex: '#ff8800', key: '6' },
+            { name: 'TEAL', hex: '#00ffff', key: '7' },
             { name: 'WHITE', hex: '#ffffff', key: '8' }
         ];
 
@@ -110,7 +114,7 @@
             timerActive = true;
             const countdown = setInterval(() => {
                 timeLeft--;
-                timerEl.innerText = `CZAS: ${timeLeft}s`;
+                timerEl.innerText = `TIME REMAINING: ${timeLeft}s`;
                 if (timeLeft <= 0) {
                     clearInterval(countdown);
                     endGame();
