@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CogniPerform // Stroop_v2.2</title>
+    <title>CogniPerform // Stroop_v2.3</title>
     <style>
         :root {
             --bg: #0d1117;
@@ -24,7 +24,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start; /* Start od góry */
+            justify-content: flex-start;
             height: 100vh;
             margin: 0;
             padding-top: 20px;
@@ -32,16 +32,11 @@
             overflow: hidden;
         }
         
-        /* NOWY PASEK STATUSU - Zamiast Calloutu w Notion */
         #status-bar {
-            font-size: 0.7rem;
-            color: var(--teal);
-            letter-spacing: 1px;
             border-bottom: 1px solid #30363d;
-            padding-bottom: 10px;
-            width: 90%;
+            padding-bottom: 15px;
             margin-bottom: 30px;
-            opacity: 0.8;
+            width: 95%;
         }
 
         #ui-layer, #result-layer { width: 100%; max-width: 500px; }
@@ -81,7 +76,12 @@
 <body>
 
     <div id="status-bar">
-        [ PROTOCOL: STROOP_CORE ] &nbsp; [ LIMIT: 60s ] &nbsp; [ TARGET: INHIBITION ]
+        <div style="font-size: 0.65rem; color: var(--teal); opacity: 0.7; letter-spacing: 2px; margin-bottom: 8px;">
+            [ PROTOCOL: STROOP_CORE ] &nbsp; [ LIMIT: 60s ] &nbsp; [ TARGET: INHIBITION ]
+        </div>
+        <div style="font-size: 0.9rem; color: #ffffff; font-weight: 500; letter-spacing: 0.5px;">
+            <span style="color: var(--orange);"> > </span> IDENTIFY THE <span style="color: var(--orange); font-weight: bold;">COLOR</span>. IGNORE THE TEXT. USE [1-8] OR MOUSE.
+        </div>
     </div>
 
     <div id="ui-layer">
