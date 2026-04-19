@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CogniPerform // Stroop_v2.4</title>
+    <title>CogniPerform // Stroop_v2.6</title>
     <style>
         :root {
             --bg: #0d1117;
@@ -12,7 +12,6 @@
             --green: #00ff00;
             --blue: #3366ff;
             --yellow: #ffff00;
-            --purple: #cc33ff;
             --orange: #ff8800;
             --teal: #00ffff;
         }
@@ -51,7 +50,7 @@
         }
         .controls {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 10px;
             padding: 10px;
         }
@@ -79,12 +78,12 @@
             [ PROTOCOL: STROOP_CORE ] &nbsp; [ LIMIT: 60s ] &nbsp; [ TARGET: INHIBITION ]
         </div>
         <div style="font-size: 0.9rem; color: #ffffff; font-weight: 500; letter-spacing: 0.5px;">
-            <span style="color: var(--orange);"> > </span> IDENTIFY THE <span style="color: var(--orange); font-weight: bold;">COLOR</span>. IGNORE THE TEXT. USE [1-6] OR MOUSE.
+            <span style="color: var(--orange);"> > </span> IDENTIFY THE <span style="color: var(--orange); font-weight: bold;">COLOR</span>. IGNORE THE TEXT. USE [1-4] OR MOUSE.
         </div>
     </div>
 
     <div id="ui-layer">
-        <div id="timer">READY? PRESS [1-6] TO START</div>
+        <div id="timer">READY? PRESS [1-4] TO START</div>
         <div id="word-display">▓▓▓▓▓</div>
         <div class="controls" id="btn-group"></div>
     </div>
@@ -105,9 +104,7 @@
             { name: 'RED',    hex: '#ff0000', key: '1' },
             { name: 'GREEN',  hex: '#00ff00', key: '2' },
             { name: 'BLUE',   hex: '#3366ff', key: '3' },
-            { name: 'YELLOW', hex: '#ffff00', key: '4' },
-            { name: 'PURPLE', hex: '#cc33ff', key: '5' },
-            { name: 'ORANGE', hex: '#ff8800', key: '6' }
+            { name: 'YELLOW', hex: '#ffff00', key: '4' }
         ];
 
         let hits = 0, misses = 0, timeLeft = 60, timerActive = false, currentTarget = '';
