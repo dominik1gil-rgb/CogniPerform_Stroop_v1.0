@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CogniPerform // Reaction_v1.1</title>
+    <title>CogniPerform // Reaction_v1.2</title>
     <style>
         :root {
             --bg: #0d1117;
@@ -26,7 +26,6 @@
             padding-top: 20px;
             text-align: center;
             overflow: hidden;
-            cursor: pointer;
         }
         
         #status-bar {
@@ -34,7 +33,6 @@
             padding-bottom: 15px;
             margin-bottom: 30px;
             width: 95%;
-            pointer-events: none;
         }
 
         #main-zone {
@@ -48,34 +46,63 @@
             border: 2px solid #30363d;
             border-radius: 12px;
             transition: background 0.1s;
+            cursor: pointer;
         }
 
         #instruction { font-size: 1.2rem; font-weight: bold; pointer-events: none; }
-        #ms-display { font-size: 3rem; color: var(--teal); margin-top: 10px; display: none; }
+        #ms-display { font-size: 3rem; color: var(--teal); margin-top: 10px; display: none; pointer-events: none; }
 
-        .summary-box { display: none; border: 2px solid var(--teal); padding: 30px; border-radius: 12px; background: #161b22; max-width: 400px; }
-        .restart-btn { margin-top: 25px; background: var(--teal); color: #000; font-weight: bold; border: none; padding: 12px 30px; cursor: pointer; border-radius: 4px; }
+        .summary-box { display: none; border: 2px solid var(--teal); padding: 30px; border-radius: 12px; background: #161b22; max-width: 440px; width: 90%; text-align: left; }
+        .summary-box h2 { text-align: center; margin-top: 0; }
+        .summary-headline { display: flex; justify-content: space-between; gap: 20px; margin: 20px 0; }
+        .summary-metric { flex: 1; text-align: center; }
+        .summary-metric .label { font-size: 0.7rem; color: #8b949e; letter-spacing: 2px; margin-bottom: 4px; }
+        .summary-metric .value { font-size: 1.8rem; font-weight: bold; }
+        .summary-metric .best { color: var(--green); }
+        .summary-metric .avg { color: var(--teal); }
+        .trials-list { border-top: 1px solid #30363d; padding-top: 15px; margin-top: 10px; font-size: 0.85rem; }
+        .trials-list .trials-label { font-size: 0.7rem; color: #8b949e; letter-spacing: 2px; margin-bottom: 8px; }
+        .trial-row { display: flex; justify-content: space-between; padding: 3px 0; }
+        .trial-row.dropped { color: #6e7681; text-decoration: line-through; }
+        .trial-tag { font-size: 0.7rem; color: #6e7681; }
+        .restart-btn { display: block; margin: 25px auto 0; background: var(--teal); color: #000; font-weight: bold; border: none; padding: 12px 30px; cursor: pointer; border-radius: 4px; font-family: inherit; }
     </style>
 </head>
-<body onclick="handleClick()">
+<body>
 
     <div id="status-bar">
         <div style="font-size: 0.65rem; color: var(--teal); opacity: 0.7; letter-spacing: 2px; margin-bottom: 8px;">
-            [ PROTOCOL: REACTION_DRILL ] &nbsp; [ TRIALS: 5 ] &nbsp; [ TARGET: LATENCY ]
+            [ PROTOCOL: REACTION_DRILL ] &nbsp; [ TRIALS: 7 ] &nbsp; [ TARGET: LATENCY ]
         </div>
         <div style="font-size: 0.9rem; color: #ffffff; font-weight: 500; letter-spacing: 0.5px;">
             <span style="color: var(--orange);"> > </span> WAIT FOR GREEN SIGNAL. CLICK IMMEDIATELY. USE [SPACE] OR MOUSE.
         </div>
     </div>
 
-    <div id="main-zone">
+    <div id="main-zone" onclick="handleClick()">
         <div id="instruction">CLICK TO START</div>
         <div id="ms-display">0 ms</div>
     </div>
 
     <div id="summary" class="summary-box">
         <h2 style="color:var(--teal)">DRILL COMPLETE</h2>
-        <p>Average Speed: <span id="avg-speed" style="color:var(--green); font-weight:bold; font-size: 1.5rem;">0</span> ms</p>
+
+        <div class="summary-headline">
+            <div class="summary-metric">
+                <div class="label">BEST</div>
+                <div class="value best"><span id="best-speed">0</span> ms</div>
+            </div>
+            <div class="summary-metric">
+                <div class="label">AVERAGE</div>
+                <div class="value avg"><span id="avg-speed">0</span> ms</div>
+            </div>
+        </div>
+
+        <div class="trials-list">
+            <div class="trials-label">ALL TRIALS</div>
+            <div id="trials-container"></div>
+        </div>
+
         <button class="restart-btn" onclick="location.reload()">RESTART</button>
     </div>
 
@@ -83,7 +110,7 @@
         let state = 'IDLE'; 
         let startTime, timeout;
         let trials = [];
-        const maxTrials = 5;
+        const maxTrials = 7;
 
         const mainZone = document.getElementById('main-zone');
         const instruction = document.getElementById('instruction');
@@ -91,6 +118,7 @@
         const summary = document.getElementById('summary');
 
         function handleClick() {
+            if (state === 'FINISHED') return;
             if (state === 'IDLE') { startTrial(); } 
             else if (state === 'WAITING') { tooEarly(); } 
             else if (state === 'CLICKABLE') { recordReaction(); }
@@ -130,19 +158,61 @@
             msDisplay.innerText = reactionTime + ' ms';
             msDisplay.style.display = 'block';
             if (trials.length < maxTrials) {
-                setTimeout(() => { if (state === 'IDLE') instruction.innerText = 'CLICK FOR NEXT TRIAL (' + (trials.length + 1) + '/' + maxTrials + ')'; }, 1000);
-            } else { showSummary(); }
+                setTimeout(() => { 
+                    if (state === 'IDLE') instruction.innerText = 'CLICK FOR NEXT TRIAL (' + (trials.length + 1) + '/' + maxTrials + ')'; 
+                }, 1000);
+            } else { 
+                showSummary(); 
+            }
         }
 
         function showSummary() {
             state = 'FINISHED';
-            document.getElementById('main-zone').style.display = 'none';
-            summary.style.display = 'block';
-            const avg = Math.round(trials.reduce((a, b) => a + b) / maxTrials);
+            mainZone.style.display = 'none';
+            mainZone.style.cursor = 'default';
+
+            // Sort trials ascending to identify fastest and slowest
+            const sorted = [...trials].sort((a, b) => a - b);
+            const fastestValue = sorted[0];
+            const slowestValue = sorted[sorted.length - 1];
+            const middleFive = sorted.slice(1, -1);
+            const avg = Math.round(middleFive.reduce((a, b) => a + b, 0) / middleFive.length);
+
+            document.getElementById('best-speed').innerText = fastestValue;
             document.getElementById('avg-speed').innerText = avg;
+
+            // Render all 7 trials in original order with dropped ones marked
+            const container = document.getElementById('trials-container');
+            container.innerHTML = '';
+            let fastestMarked = false;
+            let slowestMarked = false;
+            trials.forEach((t, i) => {
+                const row = document.createElement('div');
+                row.className = 'trial-row';
+                let tag = '';
+                // Mark exactly one fastest and one slowest (in case of ties, the first occurrence is dropped)
+                if (t === fastestValue && !fastestMarked) {
+                    row.classList.add('dropped');
+                    tag = '<span class="trial-tag">DROPPED (fastest)</span>';
+                    fastestMarked = true;
+                } else if (t === slowestValue && !slowestMarked) {
+                    row.classList.add('dropped');
+                    tag = '<span class="trial-tag">DROPPED (slowest)</span>';
+                    slowestMarked = true;
+                }
+                row.innerHTML = '<span>Trial ' + (i + 1) + ': ' + t + ' ms</span>' + tag;
+                container.appendChild(row);
+            });
+
+            summary.style.display = 'block';
         }
 
-        window.addEventListener('keydown', (e) => { if (e.code === 'Space') { e.preventDefault(); handleClick(); } });
+        window.addEventListener('keydown', (e) => { 
+            if (e.code === 'Space') { 
+                e.preventDefault(); 
+                handleClick(); 
+            } 
+        });
     </script>
 </body>
 </html>
