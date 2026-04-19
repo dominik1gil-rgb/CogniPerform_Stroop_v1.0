@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CogniPerform // Stroop_v2.3</title>
+    <title>CogniPerform // Stroop_v2.4</title>
     <style>
         :root {
             --bg: #0d1117;
@@ -15,7 +15,6 @@
             --purple: #cc33ff;
             --orange: #ff8800;
             --teal: #00ffff;
-            --white: #ffffff;
         }
         body {
             background-color: var(--bg);
@@ -52,7 +51,7 @@
         }
         .controls {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             padding: 10px;
         }
@@ -80,13 +79,13 @@
             [ PROTOCOL: STROOP_CORE ] &nbsp; [ LIMIT: 60s ] &nbsp; [ TARGET: INHIBITION ]
         </div>
         <div style="font-size: 0.9rem; color: #ffffff; font-weight: 500; letter-spacing: 0.5px;">
-            <span style="color: var(--orange);"> > </span> IDENTIFY THE <span style="color: var(--orange); font-weight: bold;">COLOR</span>. IGNORE THE TEXT. USE [1-8] OR MOUSE.
+            <span style="color: var(--orange);"> > </span> IDENTIFY THE <span style="color: var(--orange); font-weight: bold;">COLOR</span>. IGNORE THE TEXT. USE [1-6] OR MOUSE.
         </div>
     </div>
 
     <div id="ui-layer">
-        <div id="timer">READY? PRESS [1-8] TO START</div>
-        <div id="word-display">STROOP</div>
+        <div id="timer">READY? PRESS [1-6] TO START</div>
+        <div id="word-display">▓▓▓▓▓</div>
         <div class="controls" id="btn-group"></div>
     </div>
 
@@ -103,17 +102,16 @@
 
     <script>
         const colors = [
-            { name: 'RED', hex: '#ff0000', key: '1' },
-            { name: 'GREEN', hex: '#00ff00', key: '2' },
-            { name: 'BLUE', hex: '#3366ff', key: '3' },
+            { name: 'RED',    hex: '#ff0000', key: '1' },
+            { name: 'GREEN',  hex: '#00ff00', key: '2' },
+            { name: 'BLUE',   hex: '#3366ff', key: '3' },
             { name: 'YELLOW', hex: '#ffff00', key: '4' },
             { name: 'PURPLE', hex: '#cc33ff', key: '5' },
-            { name: 'ORANGE', hex: '#ff8800', key: '6' },
-            { name: 'TEAL', hex: '#00ffff', key: '7' },
-            { name: 'WHITE', hex: '#ffffff', key: '8' }
+            { name: 'ORANGE', hex: '#ff8800', key: '6' }
         ];
 
         let hits = 0, misses = 0, timeLeft = 60, timerActive = false, currentTarget = '';
+        let started = false;
 
         const wordEl = document.getElementById('word-display');
         const timerEl = document.getElementById('timer');
@@ -122,12 +120,24 @@
         colors.forEach((c) => {
             const btn = document.createElement('button');
             btn.innerText = `[${c.key}] ${c.name}`;
-            btn.onclick = () => checkColor(c.name);
+            btn.onclick = () => handleInput(c.name);
             btnGroup.appendChild(btn);
         });
 
+        function handleInput(selected) {
+            if (!started) {
+                started = true;
+                nextRound();
+                startTimer();
+                return;
+            }
+            selected === currentTarget ? hits++ : misses++;
+            nextRound();
+        }
+
         function startTimer() {
             timerActive = true;
+            timerEl.innerText = `TIME REMAINING: ${timeLeft}s`;
             const countdown = setInterval(() => {
                 timeLeft--;
                 timerEl.innerText = `TIME REMAINING: ${timeLeft}s`;
@@ -147,12 +157,6 @@
             currentTarget = colors[cIdx].name;
         }
 
-        function checkColor(selected) {
-            if (!timerActive) startTimer();
-            selected === currentTarget ? hits++ : misses++;
-            nextRound();
-        }
-
         function endGame() {
             document.getElementById('ui-layer').style.display = 'none';
             document.getElementById('result-layer').style.display = 'block';
@@ -164,10 +168,8 @@
 
         window.addEventListener('keydown', (e) => {
             const color = colors.find(c => c.key === e.key);
-            if (color) checkColor(color.name);
+            if (color) handleInput(color.name);
         });
-
-        nextRound();
     </script>
 </body>
 </html>
